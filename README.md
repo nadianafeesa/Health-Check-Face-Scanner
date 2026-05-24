@@ -1,4 +1,25 @@
 # Health Check With Human Face Scanner
+
+A browser-based health screening web app that classifies facial images as **healthy** or **sick** using an ensemble of region-specific Convolutional Neural Networks (CNNs).
+
+## About
+This app analyses five facial regions — left eye, right eye, nose, mouth, and skin — using individually trained CNNs, combining their predictions via majority voting to produce a final classification. Built as a Final Year Project at Monash University, it achieves **97.2% aggregated accuracy** and an average ROC AUC of **0.962** across all subregions.
+
+### Architecture
+![System Architecture](md_images/architecture.png)
+
+### Project Deliverables
+![Project Deliverables](md_images/deliverables.png)
+
+## Features
+- Real-time webcam capture and image file upload
+- Per-region confidence scores with visual zone highlights
+- Offline-capable and cross-platform (Windows/macOS)
+
+## Tech Stack
+Python, TensorFlow, Keras, OpenCV, dlib, Flask, HTML/CSS/JavaScript
+
+---
 ![Main Screen](md_images/main_screen.png)
 ![Scan Screen](md_images/face_scan.png)
 ![Healthy Result](md_images/healthy_result.png)
