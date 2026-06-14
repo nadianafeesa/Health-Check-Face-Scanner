@@ -45,9 +45,11 @@ augment/output/checkpoints/*
 # ignore virtual environment 
 venv310
 .venv
-<<<<<<< Updated upstream
 venv/*
 !static/images/*
-=======
-venv
->>>>>>> Stashed changes
+
+.venv/
+__pycache__/
+.DS_Store
+.env
+*.pyc

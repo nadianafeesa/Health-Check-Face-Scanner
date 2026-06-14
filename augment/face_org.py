@@ -21,7 +21,9 @@ import cv2
 from collections import OrderedDict
 import matplotlib.pyplot as plt
 import os
+from pathlib import Path
 
+PARSED_OUTPUT_DIR = Path(os.environ.get("PARSED_OUTPUT_DIR", "data/parsed"))
 resizeImages = True
 
 mouth_ids = np.array([48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59])
@@ -101,11 +103,11 @@ def exportImage(status, file_name, part_name, img):
     # path_to_exp = "data/parsed/" + status + "/" + file_name + "_" + part_name
 
     # 1) ensure output folder exists
-    out_dir = os.path.join("data", "parsed", status)
-    os.makedirs(out_dir, exist_ok=True)
+    out_dir = PARSED_OUTPUT_DIR / status
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     # 2) build a filename with .png extension
-    path_to_exp = os.path.join(out_dir, f"{file_name}_{part_name}.png")
+    path_to_exp = out_dir / f"{file_name}_{part_name}.png"
 
     fig = plt.figure(frameon=False)
     plt.axis("off")
