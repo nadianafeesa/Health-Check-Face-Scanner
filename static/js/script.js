@@ -72,9 +72,16 @@ function handleFileUpload(e) {
         <p>It will take some time...</p>`;
     document.body.appendChild(loader)
 
+    const resetScanPage = () => {
+        loader.remove();
+        alert("Something went wrong during analysis. Please try again with a clear JPEG or PNG image.");
+        window.location.href = "/scan";
+    };
+
     const data = new FormData();
     data.append("file", file);
 
+    // If the server returns an error, always remove the loader and send the user back to the scan page.
     fetch("/predict", {
         method: "POST",
         body: data
@@ -100,24 +107,25 @@ function handleFileUpload(e) {
             window.location.href = "/result";
         })
         .catch(err => {
-    console.error("Prediction error:", err);
-    const msg = err.message || "Something went wrong.";
+            console.error("Prediction error:", err);
+            const msg = err.message || "Something went wrong.";
 
-    if (msg === "No face detected") {
-        // no face‐detection alert + redirect
-        alert("No face detected. Please hold your face clearly in frame, ensure proper lighting and try again.");
-        window.location.href = "/scan";
+            loader.remove();
 
-    } else if (msg.includes("Unsupported image format")) {
-        // handles HEIC or any cv2.imread failure
-        alert("Unsupported image format. Please upload a JPEG or PNG image.");
-        window.location.href = "/scan";
-
-    } else {
-        // any other error just shows its message
-        alert(msg);
-    }
-    });
+            if (msg === "No face detected") {
+                alert("No face detected. Please hold your face clearly in frame, ensure proper lighting and try again.");
+                window.location.href = "/scan";
+            } else if (msg.includes("Unsupported image format")) {
+                alert("Unsupported image format. Please upload a JPEG or PNG image.");
+                window.location.href = "/scan";
+            } else if (msg.includes("Missing crop")) {
+                alert("The app could not extract all facial regions from this image. Please try again with your face clearly visible and centred.");
+                window.location.href = "/scan";
+            } else {
+                alert(msg);
+                window.location.href = "/scan";
+            }
+        });
 
 }
 
