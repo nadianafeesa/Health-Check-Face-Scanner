@@ -1,3 +1,12 @@
+---
+title: Health Check Face Scanner
+emoji: 🩺
+colorFrom: purple
+colorTo: blue
+sdk: docker
+app_port: 7860
+---
+
 # Health Check With Human Face Scanner
 
 A browser-based health screening web app that classifies facial images as **healthy** or **sick** using an ensemble of region-specific Convolutional Neural Networks (CNNs).
