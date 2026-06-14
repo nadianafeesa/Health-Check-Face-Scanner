@@ -12,6 +12,7 @@ from werkzeug.utils import secure_filename
 from pathlib import Path
 from augment.alter_images import increase_brightness
 import cv2
+PARSED_OUTPUT_DIR = Path(os.environ.get("PARSED_OUTPUT_DIR", "data/parsed"))
 
 
 app = Flask(__name__, 
@@ -79,8 +80,8 @@ def predict():
     stem     = "capture"
     fname = f"{stem}.png"
 
-    # 2) save it into data/parsed/tmp/capture.png
-    tmpdir  = Path("data/parsed/tmp")
+    # 2) save it into the configured parsed tmp directory
+    tmpdir  = PARSED_OUTPUT_DIR / "tmp"
     tmpdir.mkdir(parents=True, exist_ok=True)
     on_disk = tmpdir / fname
     upload.save(on_disk)
@@ -245,8 +246,8 @@ def predict():
 
 @app.route("/tmp/<path:filename>")
 def tmp_file(filename):
-    # Serves files from data/parsed/tmp/
-    return send_from_directory("data/parsed/tmp", filename)
+    # Serves files from the configured parsed tmp directory
+    return send_from_directory(PARSED_OUTPUT_DIR / "tmp", filename)
 
 
 if __name__ == "__main__":
