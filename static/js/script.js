@@ -121,6 +121,12 @@ function handleFileUpload(e) {
             } else if (msg.includes("Missing crop")) {
                 alert("The app could not extract all facial regions from this image. Please try again with your face clearly visible and centred.");
                 window.location.href = "/scan";
+                        } else if (msg === "500" || msg.includes("500") || msg.includes("Internal Server Error")) {
+                alert("The server ran out of time while analysing this image. Please try again in a moment, or use a smaller/clearer image.");
+                window.location.href = "/scan";
+            } else if (msg === "502" || msg.includes("502")) {
+                alert("The server restarted while analysing this image. Please wait a moment, then try again.");
+                window.location.href = "/scan";
             } else {
                 alert(msg);
                 window.location.href = "/scan";
