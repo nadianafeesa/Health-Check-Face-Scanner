@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 import tensorflow as tf
 import numpy as np
+import gc
 from PIL import Image
 import glob, os
 import matplotlib
@@ -31,8 +32,9 @@ best_models = {
     "skin": 4
 }
 
-# Load models for each region
-models = {}
+# Resolve model paths without loading all TensorFlow models at startup.
+# This keeps local behavior the same, but uses much less memory on Render Free.
+model_paths = {}
 for feature in face_features:
     fold = best_models[feature]
     pattern = os.path.join("categorization", "model_saves", feature, f"model_{fold}.h5")
@@ -40,12 +42,9 @@ for feature in face_features:
     if not candidates:
         raise FileNotFoundError(f"No models found for '{feature}', looked for {pattern}")
 
-    # sort by the fold number and pick the highest
     candidates.sort(key=lambda p: int(os.path.basename(p).split("_")[1].split(".")[0]))
-    best_checkpoint = candidates[-1]
-
-    print(f"[INFO] Loading {feature} model from → {best_checkpoint}")
-    models[feature] = tf.keras.models.load_model(best_checkpoint, compile=False)
+    model_paths[feature] = candidates[-1]
+    print(f"[INFO] Resolved {feature} model path → {model_paths[feature]}")
 
 #web pages
 @app.route("/")
@@ -68,6 +67,18 @@ def preprocess_array(arr, size=128):
     """Resize a NumPy array and scale to [0,1]."""
     img = Image.fromarray(arr).convert("RGB").resize((size, size))
     return np.expand_dims(np.array(img)/255.0, axis=0)
+
+def predict_feature(feature, x):
+    """Load one model, run one prediction, then release memory."""
+    model_path = model_paths[feature]
+    app.logger.info(f"Loading {feature} model for prediction from → {model_path}")
+    model = tf.keras.models.load_model(model_path, compile=False)
+    try:
+        return float(model.predict(x, verbose=0)[0][0])
+    finally:
+        del model
+        tf.keras.backend.clear_session()
+        gc.collect()
 
 @app.route("/predict", methods=["POST"])
 def predict():
@@ -189,7 +200,7 @@ def predict():
         x   = preprocess_array(arr)
         #here, p is the prediction (float 0 to 1). 
         #predict() is the method to run data through the model
-        p   = float(models[feat].predict(x)[0][0])
+        p   = predict_feature(feat, x)
         threshold = thresholds.get(feat, 0.5)
         label = "Sick" if p > threshold else "Healthy"
 
